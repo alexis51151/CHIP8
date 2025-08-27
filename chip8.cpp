@@ -83,8 +83,14 @@ class Chip8 {
     void OP_1nnn();
     // call nnn (lowest 12 bits of the instruction)
     void OP_2nnn();
-    // conditional skip (lowest byte of the instruction)
+    // conditional eq skip (lowest byte of the instruction)
     void OP_3xkk();
+    // conditional neq skip (lowest byte of the instruction)
+    void OP_4xkk();
+    // conditional skip with cmp between two registers
+    void OP_5xy0();
+    // load kk to register Vx
+    void OP_6xkk();
 };
 
 // Constructor: initialize the VM
@@ -169,12 +175,13 @@ void Chip8::OP_2nnn() {
   pc = addr;
 }
 
-// '3xkk': Skip next instruction if Vx == kk, where Vx is a register
+// '3xkk': SE Vx, byte
+// Skip next instruction if Vx == kk, where Vx is a register
 // kk corresponds to the lowest 8 bits of opcode.
 // x corresponds to the lower 4 bits of the high byte of the opcode.
 // Conditional jump based on test 
 void Chip8::OP_3xkk() {
-  // take the 2nd byte 
+  // take the lower 4 bits of the high byte 
   uint8_t Vx = (opcode & 0x0F00u) >> 8u;
   // take the first 
   uint8_t byte = opcode  & 0x00FFu;
@@ -182,5 +189,49 @@ void Chip8::OP_3xkk() {
   // conditional jump if Vx == k 
   if (registers[Vx] == byte)
     pc += 2;
+}
 
+// '4xkk': SNE Vx, byte
+// Skip next instruction if Vx != kk, where Vx is a register
+// kk corresponds to the lowest 8 bits of opcode.
+// x corresponds to the lower 4 bits of the high byte of the opcode.
+// Conditional jump based on test 
+void Chip8::OP_4xkk() {
+  // take the lower 4 bits of the high byte
+  uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+  // take the first 
+  uint8_t byte = opcode  & 0x00FFu;
+
+  // conditional jump if Vx == k 
+  if (registers[Vx] != byte)
+    pc += 2;
+}
+
+// '5xy0': SE Vx, Vy
+// Skip next instruction if Vx == Vy
+// x corresponds to the lower 4 bits of the high byte of the opcode.
+// y corresponds to the upper 4 bits of the low byte of the opcode.
+void Chip8::OP_5xy0() {
+  // take the lower 4 bits of the high byte
+  uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+  // take the upper 4 bits of the low byte
+  uint8_t Vy = (opcode & 0x00F0u) >> 4u;
+
+  // conditional jump if Vx == Vy
+  if (registers[Vx] == registers[Vy])
+    pc += 2;
+}
+
+// '6xkk': LD Vx, byyr
+// Set Vx = kk
+// x corresponds to the lower 4 bits of the high byte of the opcode.
+// kk corresponds to the lowest 8 bits of the opcode.
+void Chip8::OP_6xkk() {
+  // take the lowest 8 bits
+  uint8_t byte = (opcode & 0x00FFu);
+  // take the lower 4 bits of the high byte
+  uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+
+  // load value to register
+  registers[Vx] = byte;
 }
