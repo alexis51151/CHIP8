@@ -91,6 +91,18 @@ class Chip8 {
     void OP_5xy0();
     // load kk to register Vx
     void OP_6xkk();
+    // add kk to register Vx
+    void OP_7xkk();
+    // load value of register Vy to register Vx
+    void OP_8xy0();
+    // bitwise or of Vx and Vy
+    void OP_8xy1();
+    // bitwise and of Vx and Vy
+    void OP_8xy2();
+    // XOR of Vx and Vy
+    void OP_8xy3();
+    // ADD of Vx and Vy in Vx with overflow flag
+    void OP_8xy4();
 };
 
 // Constructor: initialize the VM
@@ -106,7 +118,7 @@ Chip8::Chip8()
   }
 
   // Initialize RNG
-  randBytes = std::uniform_int_distribution<uint8_t>(44H, 255U);
+  randBytes = std::uniform_int_distribution<uint8_t>(0, 255U);
 }
 
 // Load ROM into VM
@@ -222,7 +234,7 @@ void Chip8::OP_5xy0() {
     pc += 2;
 }
 
-// '6xkk': LD Vx, byyr
+// '6xkk': LD Vx, byte
 // Set Vx = kk
 // x corresponds to the lower 4 bits of the high byte of the opcode.
 // kk corresponds to the lowest 8 bits of the opcode.
@@ -235,3 +247,67 @@ void Chip8::OP_6xkk() {
   // load value to register
   registers[Vx] = byte;
 }
+
+// '7xkk': ADD Vx, byte
+void Chip8::OP_7xkk() {
+ // take the lowest 8 bits
+  uint8_t byte = (opcode & 0x00FFu);
+  // take the lower 4 bits of the high byte
+  uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+
+  // add value to register 
+  registers[Vx] += byte;
+}
+
+// '8xy0': LD Vx, Vy
+// Set Vx = Vy
+void Chip8::OP_8xy0() {
+  // take the lower 4 bits of the high byte
+  uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+  // take the upper 4 bits of the low byte
+  uint8_t Vy = (opcode & 0x00F0u) >> 4u;
+
+  registers[Vx] = registers[Vy];
+}
+
+// '8xy1': OR Vx, Vy
+// Set Vx = Vx OR Vy
+void Chip8::OP_8xy1() {
+  uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+  uint8_t Vy = (opcode & 0x00F0u) >> 4u;
+
+  registers[Vx] |= registers[Vy];
+}
+
+// '8xy2': AND Vx, Vy
+// Set Vx = Vx AND Vy
+void Chip8::OP_8xy2() {
+  uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+  uint8_t Vy = (opcode & 0x00F0u) >> 4u;
+
+  registers[Vx] &= registers[Vy];
+}
+
+// '8xy3': XOR Vx, Vy
+// Set Vx = Vx XOR Vy
+void Chip8::OP_8xy3() {
+  uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+  uint8_t Vy = (opcode & 0x00F0u) >> 4u;
+
+  registers[Vx] ^= registers[Vy];
+}
+
+// '8xy4': ADD Vx, Vy
+void Chip8::OP_8xy4() {
+  uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+  uint8_t Vy = (opcode & 0x00F0u) >> 4u;
+
+  uint16_t sum = registers[Vx] + registers[Vy];
+
+  // Set VF to carry (if overflow 8 bits)
+  registers[0xF] = (sum > 0xFFu);
+  
+  // put the lowest 8 bits in Vx
+  registers[Vx] = (sum & 0xFFu);
+}
+
