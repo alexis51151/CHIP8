@@ -23,8 +23,12 @@ const uint32_t FONTSET_SIZE = 80;
 
 class Chip8 {
   public:
+    // Constructor
     Chip8();
+    // Load a ROM into memory
     void LoadROM(char const* filename);
+    // Perform one cycle of the simulation
+    void Cycle();
 
   private:
    // 16 8-bit registers (V0 to VF)
@@ -52,7 +56,7 @@ class Chip8 {
     // RNG
     std::default_random_engine randGen;
     // Randomly generated value
-    std::uniform_int_distribution<uint8_t> randBytes;
+    std::uniform_int_distribution<uint8_t> randByte;
 
     // clear display
     void OP_00E0();
@@ -94,5 +98,9 @@ class Chip8 {
     void OP_9xy0();
     // LD I, addr (put addr at index)
     void OP_Annn();
+    // JP V0, addr (jump to location nnn + V0)
+    void OP_Bnnn();
+    // RND Vx, byte (set Vx = random byte AND kk)
+    void OP_Cxkk();
 };
 

@@ -298,9 +298,30 @@ void Chip8::OP_9xy0(){
   }
 }
 
+// 'Annn': LD I, addr
+// Set I = nnn
+void Chip8::OP_Annn() {
+  uint16_t nnn = (opcode & 0x0FFFu);
+
+  index = nnn;
+}
+
+// 'Bnnn': JP V0, addr
+// Jump to location nnn + V0
+void Chip8::OP_Bnnn() {
+  uint16_t nnn = (opcode & 0x0FFFu);
+
+  pc = nnn + registers[0];
+}
 
 
+// 'Cxkk': RND Vx, byte
+// Set Vx = random byte AND kk
+void Chip8::OP_Cxkk() {
+  uint8_t kk = (opcode & 0x000Fu);
+  uint8_t Vx = (opcode & 0x0F00u) >> 8u;
 
-
+  registers[Vx] = randByte(randGen) & kk;
+}
 
 
