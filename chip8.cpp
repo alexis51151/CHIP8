@@ -39,7 +39,7 @@ Chip8::Chip8()
   }
 
   // Initialize RNG
-  randBytes = std::uniform_int_distribution<uint8_t>(0, 255U);
+  randByte = std::uniform_int_distribution<uint8_t>(0, 255U);
 }
 
 // Load ROM into VM
@@ -346,4 +346,85 @@ void Chip8::OP_Dxyn() {
       }
     }
   }
+}
+
+// 'Ex9E': SKP Vx
+// Skip next instruction if a key of value Vx is pressed
+void Chip8::OP_Ex9E() {
+  uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+  uint8_t key = registers[Vx];
+
+  if (keypad[key]) {
+    pc += 2;
+  }
+}
+
+// `Fx07`: LD Vx, DT
+// Load DT into Vx
+void Chip8::OP_Fx07() {
+  uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+  registers[Vx] = delayTimer;
+}
+
+// `Fx0A`: LD Vx, K
+// Wait for a key press, and load the value into Vx
+void Chip8::OP_Fx0A() {
+  uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+
+  if (keypad[0]) {
+    registers[Vx] = 0;
+  } else if (keypad[1]) {
+    registers[Vx] = 1;
+  } else if (keypad[2]) {
+    registers[Vx] = 2;
+  } else if (keypad[3]) {
+    registers[Vx] = 3;
+  } else if (keypad[4]) {
+    registers[Vx] = 4;
+  } else if (keypad[5]) {
+    registers[Vx] = 5;
+  } else if (keypad[6]) {
+    registers[Vx] = 6;
+  } else if (keypad[7]) {
+    registers[Vx] = 7;
+  } else if (keypad[8]) {
+    registers[Vx] = 8;
+  } else if (keypad[9]) {
+    registers[Vx] = 9;
+  } else if (keypad[10]) {
+    registers[Vx] = 10;
+  } else if (keypad[11]) {
+    registers[Vx] = 11;
+  } else if (keypad[12]) {
+    registers[Vx] = 12;
+  } else if (keypad[13]) {
+    registers[Vx] = 13;
+  } else if (keypad[14]) {
+    registers[Vx] = 14;
+  } else if (keypad[15]) {
+    registers[Vx] = 15;
+  } else {
+    pc -= 2;
+  }
+}
+
+// LD DT, Vx
+// Load value of Vx into the Delay Timer
+void Chip8::OP_Fx15() {
+  uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+  delayTimer = registers[Vx];
+}
+
+// LD ST, Vx
+// Load value of Vx into the Sound Timer
+void Chip8::OP_Fx18() {
+  uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+  soundTimer = registers[Vx];
+}
+
+// ADD I, Vx
+// Add I and Vx into I
+void Chip8::OP_Fx1E() {
+  uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+  index += registers[Vx];
 }

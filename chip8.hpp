@@ -103,4 +103,16 @@ private:
   void OP_Cxkk();
   // DRW Vx, Vy, nibble (display n-byte sprite)
   void OP_Dxyn();
+  // SKP Vx (skip next instruction if Vx key is pressed)
+  void OP_Ex9E();
+  // LD Vx, DT (value of DT is placed into Vx)
+  void OP_Fx07();
+  // LD Vx, K (wait for a key press, store the value of the key in Vx)
+  void OP_Fx0A();
+  // LD DT, Vx (set delay timer to Vx)
+  void OP_Fx15();
+  // LD ST, Vx (set sound timer to Vx)
+  void OP_Fx18();
+  // ADD I, Vx (add I to Vx and store into I)
+  void OP_Fx1E();
 };
