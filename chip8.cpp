@@ -1,7 +1,9 @@
-#include <chrono>  // measure time
+#include <chrono> // measure time
+#include <cstdint>
 #include <cstring> // memset
 #include <fstream> // IO
 #include <iterator>
+#include <sys/types.h>
 
 #include "chip8.hpp"
 
@@ -427,4 +429,52 @@ void Chip8::OP_Fx18() {
 void Chip8::OP_Fx1E() {
   uint8_t Vx = (opcode & 0x0F00u) >> 8u;
   index += registers[Vx];
+}
+
+// LD F, Vx
+// Set I to the value of the digit of Vx
+void Chip8::OP_Fx29() {
+  uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+  uint8_t digit = registers[Vx];
+  index = FONSET_START_ADDRESS + digit * 5;
+}
+
+// LD B, Vx
+// Load the BCD representation of the value stored in Vx at locations
+// I, I+1 and I+2 in memory.
+// BCD = Binary-Coded Decimals
+// Use the binary representation of numbers from 0 to 9 and then use the
+// decimal decomposition of the number
+void Chip8::OP_Fx33() {
+  uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+  uint8_t number = registers[Vx];
+
+  // hundreds digit in Memory I
+  memory[index] = number / 100;
+  number %= 100;
+
+  // tens digit in Memory I + 1
+  memory[index + 1] = number / 10;
+  number %= 10;
+
+  // ones digits in Memory I + 2
+  memory[index + 2] = number;
+}
+
+// LD [I], Vx
+// Load registers from V0 to Vx from memory location I
+void Chip8::OP_Fx55() {
+  uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+  for (uint8_t i = 0; i <= Vx; i++) {
+    memory[index + i] = registers[i];
+  }
+}
+
+// LD Vx, [I]
+// Read registers from V0 to Vx into memory location I.
+void Chip8::OP_Fx65() {
+  uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+  for (uint8_t i = 0; i <= Vx; i++) {
+    registers[i] = memory[index + i];
+  }
 }

@@ -115,4 +115,13 @@ private:
   void OP_Fx18();
   // ADD I, Vx (add I to Vx and store into I)
   void OP_Fx1E();
+  // LD F, Vx (value of I is set to location of of sprite for digit Vx)
+  void OP_Fx29();
+  // LD B, Vx (store BCD representation of Vx value at locations I, I+1 and I+2)
+  void OP_Fx33();
+  // LD [I], Vx (store registers from V0 to Vx in memory starting at location I)
+  void OP_Fx55();
+  // Ld Vx, [I] (read registers from V0 to Vx from memory starting at location
+  // I)
+  void OP_Fx65();
 };
